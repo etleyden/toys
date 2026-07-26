@@ -2,18 +2,22 @@
  * First Canvas Game: Orbs that bounce around the screen
  */
 import p5 from "p5";
-import { type CanvasGame, type Point2D } from "../utils/types";
+import {
+  type CanvasGame,
+  type GameParams,
+  type KinematicBody2D,
+  type Point2D,
+} from "../utils/types";
+import { getHostSize } from "../utils/Canvas";
+import { applyGravity, applyVelocity } from "../utils/Physics2D";
 
 export const GRAVITY = 9.8;
 export const DRAG_FACTOR = 0.1;
 
-type Orb = {
+type Orb = KinematicBody2D & {
   id: string;
-  pos: Point2D; // position
-  vel: Point2D; // velocity
   radius: number;
   hue: number;
-  mass: number;
 };
 
 /**
@@ -70,25 +74,13 @@ function createOrb(p: p5, index: number, x = 0, y = 0): Orb {
     mass: 3,
   };
 }
-export const sketch = (p: p5) => {
+export const sketch = (p: p5, _getParams: () => GameParams) => {
   // generate orbs
   let orbs: Orb[] = [];
 
-  const getHostSize = () => {
-    const host = document.querySelector(".sketch-host");
-    if (!(host instanceof HTMLElement)) {
-      return { width: p.windowWidth, height: p.windowHeight };
-    }
-
-    return {
-      width: Math.max(1, host.clientWidth),
-      height: Math.max(1, host.clientHeight),
-    };
-  };
-
   // setup -- runs before first frame
   p.setup = () => {
-    const { width, height } = getHostSize();
+    const { width, height } = getHostSize(p);
     p.createCanvas(width, height);
     p.colorMode(p.HSB, 360, 100, 100, 100);
     p.noStroke();
@@ -108,8 +100,7 @@ export const sketch = (p: p5) => {
       const wasOnBottom = orb.pos.y >= p.height - orb.radius - 1;
 
       // update orb position using velocity
-      orb.pos.x += orb.vel.x;
-      orb.pos.y += orb.vel.y;
+      applyVelocity(orb);
 
       const orbIntersectsBottom = lineIntersectsOrb(
         { x: 0, y: p.height },
@@ -143,7 +134,7 @@ export const sketch = (p: p5) => {
         orb.vel.x *= 1 - DRAG_FACTOR; // slow x velocity naturally while on the ground
         if (Math.abs(orb.vel.x) < 0.02) orb.vel.x = 0;
       }
-      orb.vel.y += orb.mass * GRAVITY * 0.01; // apply gravity to y velocity
+      applyGravity(orb); // apply gravity to the orb
 
       // draw orb
       p.fill(orb.hue, 80, 100, 85);
@@ -152,7 +143,7 @@ export const sketch = (p: p5) => {
   };
 
   p.windowResized = () => {
-    const { width, height } = getHostSize();
+    const { width, height } = getHostSize(p);
     p.resizeCanvas(width, height);
   };
 

@@ -21,7 +21,41 @@ body,
 }
 
 .controls-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
   flex: 0 0 auto;
+}
+
+.controls-row-game-select {
+  flex: 1 1 16rem;
+  min-width: 12rem;
+  max-width: 30rem;
+}
+
+.controls-row-game-select > * {
+  width: 100%;
+}
+
+.game-controls {
+  display: flex;
+  min-width: 200px;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.game-controls-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.game-controls-item input[type="range"] {
+  width: 10rem;
 }
 
 .canvas-panel {
